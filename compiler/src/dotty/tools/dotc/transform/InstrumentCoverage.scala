@@ -364,8 +364,12 @@ class InstrumentCoverage extends MacroTransform with IdentityDenotTransformer:
         InstrumentedParts.notCovered(tree)
 
     private def tryInstrument(tree: Literal)(using Context): InstrumentedParts =
-      val coverageCall = createInvokeCall(tree, tree.sourcePos)
-      InstrumentedParts.singleExpr(coverageCall, tree)
+      tree.const match
+        case Constant(null) =>
+          InstrumentedParts.notCovered(tree)
+        case _ =>
+          val coverageCall = createInvokeCall(tree, tree.sourcePos)
+          InstrumentedParts.singleExpr(coverageCall, tree)
 
     private def tryInstrument(tree: Select)(using Context): InstrumentedParts =
       val sym = tree.symbol
